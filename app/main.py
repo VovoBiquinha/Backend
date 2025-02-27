@@ -18,8 +18,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_db():
     try:
-        app.mongodb_client = AsyncIOMotorClient("mongodb://localhost:27017")
-        app.mongodb = app.mongodb_client["new_students"]
+        app.mongodb_client = AsyncIOMotorClient("mongodb+srv://guiglreis:F9iyvikkE0s39L79@vovobiquinha.d3sry.mongodb.net/").Create_New_Students
+        app.mongodb = app.mongodb_client
         print("Banco de dados conectado")
     except Exception as e:
         print(f"Erro ao conectar com o banco de dados: {e}")
@@ -45,7 +45,7 @@ async def cadastrar_aluno(aluno: Aluno):
     aluno_dict = aluno.dict()
     print(f"Inserindo aluno: {aluno_dict}") 
     try:
-        result = await app.mongodb.new_students.insert_one(aluno_dict)
+        result = await app.mongodb.New_Students.insert_one(aluno_dict)
         if result.acknowledged:
             print(f"Documento inserido com sucesso: {result.inserted_id}")
         else:
@@ -59,7 +59,7 @@ async def cadastrar_aluno(aluno: Aluno):
 
 @app.get("/alunos/", response_model=List[Aluno])
 async def listar_alunos():
-    alunos = await app.mongodb.new_students.find().to_list(100)  
+    alunos = await app.mongodb.New_Students.find().to_list(100)  
   
     for aluno in alunos:
         aluno["_id"] = str(aluno["_id"])    
