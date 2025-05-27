@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from fastapi.encoders import jsonable_encoder 
+from typing import Optional
 
 app = FastAPI()
 
@@ -18,7 +19,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_db():
     try:
-        app.mongodb_client = AsyncIOMotorClient("mongodb+srv://guiglreis:F9iyvikkE0s39L79@vovobiquinha.d3sry.mongodb.net/").Create_New_Students
+        app.mongodb_client = AsyncIOMotorClient("mongodb+srv://guiglreis:Maçadoamor33440388@vovobiquinha.d3sry.mongodb.net/").Create_New_Students
         app.mongodb = app.mongodb_client
         print("Banco de dados conectado")
     except Exception as e:
@@ -29,16 +30,16 @@ async def shutdown_db():
     app.mongodb_client.close()
 
 class Aluno(BaseModel):
-    nome: str
-    sobrenome: str
-    dataNascimento: str
-    endereco: str
-    escola: str
-    diagnostico: str
-    usoMedicamento: bool
-    nomeMedicamento: str = None
-    posologia: str = None
-    servicos: str
+    first_name: str
+    last_name: str
+    birth_date: str
+    address: str
+    school: str
+    diagnosis: str
+    medication_usage: bool
+    medication_name: Optional[str] = None
+    dosage: Optional[str] = None
+    services: str
 
 @app.post("/alunos/")
 async def cadastrar_aluno(aluno: Aluno):
@@ -60,7 +61,7 @@ async def cadastrar_aluno(aluno: Aluno):
 @app.get("/alunos/", response_model=List[Aluno])
 async def listar_alunos():
     alunos = await app.mongodb.New_Students.find().to_list(100)  
-  
+    
     for aluno in alunos:
         aluno["_id"] = str(aluno["_id"])    
     return alunos
