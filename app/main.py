@@ -1,10 +1,13 @@
 from fastapi import FastAPI
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 from fastapi.encoders import jsonable_encoder 
 from typing import Optional
+from app.report import router as report_router
+from fastapi import HTTPException
+from bson import ObjectId
 
 app = FastAPI()
 
@@ -16,11 +19,13 @@ app.add_middleware(
     allow_headers=["*"],  
 )
 
+app.include_router(report_router)
+
 @app.on_event("startup")
 async def startup_db():
     try:
-        app.mongodb_client = AsyncIOMotorClient("mongodb+srv://guiglreis:Maçadoamor33440388@vovobiquinha.d3sry.mongodb.net/").Create_New_Students
-        app.mongodb = app.mongodb_client
+        app.mongodb_client = AsyncIOMotorClient("mongodb+srv://guiglreis:Maçadoamor33440388@vovobiquinha.d3sry.mongodb.net/")
+        app.mongodb = app.mongodb_client["Create_New_Students"]
         print("Banco de dados conectado")
     except Exception as e:
         print(f"Erro ao conectar com o banco de dados: {e}")
@@ -41,6 +46,12 @@ class Aluno(BaseModel):
     dosage: Optional[str] = None
     services: str
 
+class AlunoComId(Aluno):
+    id: Optional[str]
+
+    class Config:
+        orm_mode = True
+
 @app.post("/alunos/")
 async def cadastrar_aluno(aluno: Aluno):
     aluno_dict = aluno.dict()
@@ -58,12 +69,13 @@ async def cadastrar_aluno(aluno: Aluno):
     return aluno_dict
 
 
-@app.get("/alunos/", response_model=List[Aluno])
+@app.get("/alunos/", response_model=List[AlunoComId])
 async def listar_alunos():
     alunos = await app.mongodb.New_Students.find().to_list(100)  
     
     for aluno in alunos:
-        aluno["_id"] = str(aluno["_id"])    
+        aluno["id"] = str(aluno["_id"])    
+        del aluno["_id"]
     return alunos
 
 @app.get("/")
