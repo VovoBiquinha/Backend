@@ -68,4 +68,4 @@ async def listar_alunos():
 
 @app.get("/")
 def home():
-    return {"message": "API rodando com sucesso!"}
+    return {"message": "API rodando com sucesso"}
